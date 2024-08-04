@@ -11,7 +11,14 @@ MainWindow::MainWindow(QWidget *parent)
     timer = new QTimer(this);
     timer->setInterval(1000);
     connect(timer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::timerUpdate) );
-
+    audioOutput = new QAudioOutput(this);
+    player = new QMediaPlayer(this);
+    player->setAudioOutput(audioOutput);
+    player->setSource(QUrl::fromLocalFile(QFileInfo("ding.mp3").absoluteFilePath()));
+    audioOutput->setVolume(50);
+    connect(player, &QMediaPlayer::errorOccurred, this, [](QMediaPlayer::Error error, const QString& errorString){
+		    qDebug() << "Error: " << error;
+		    });
 }
 
 MainWindow::~MainWindow()
@@ -27,12 +34,7 @@ void MainWindow::delay(int numSeconds) {
     counter = numSeconds;
 }
 void MainWindow::ding() {
-    static auto player = new QMediaPlayer(this);
-    static auto audioOutput = new QAudioOutput(this);
-    player->setAudioOutput(audioOutput);
     // ...
-    player->setSource(QUrl::fromLocalFile("ding.mp3"));
-    audioOutput->setVolume(50);
     player->play();
 }
 void MainWindow::endSerie() {
